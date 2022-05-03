@@ -4,12 +4,17 @@ const client = new MongoClient(connectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+let clientPromise;
 
 let dbConnection;
 
 module.exports = {
   connectToServer: function (callback) {
-    client.connect(function (err, db) {
+    clientPromise = client.connect();
+    console.log("HEY");
+    return callback();
+    /*
+    clientPromise = client.connect(function (err, db) {
       if (err || !db) {
         return callback(err);
       }
@@ -19,9 +24,14 @@ module.exports = {
 
       return callback();
     });
+    */
   },
 
   getDb: function () {
     return dbConnection;
   },
+
+  getClientPromise: function() {
+    return clientPromise;
+  }
 };

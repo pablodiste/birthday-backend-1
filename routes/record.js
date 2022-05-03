@@ -10,9 +10,12 @@ const dbo = require("../db/conn");
 
 // This section will help you get a list of all the records.
 recordRoutes.route("/users").get(async function (req, res) {
-  const dbConnect = dbo.getDb();
 
-  dbConnect
+  const client = await dbo.getClientPromise();
+  //const dbConnect = dbo.getDb();
+
+  //dbConnect
+  client.db("birthdays")
     .collection("users")
     .find({}).limit(50)
     .toArray(function (err, result) {
