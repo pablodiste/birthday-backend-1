@@ -11,7 +11,7 @@ let dbConnection;
 module.exports = {
   connectToServer: function (callback) {
     clientPromise = client.connect();
-    console.log("HEY");
+    console.log("Connected to mongo client");
     return callback();
     /*
     clientPromise = client.connect(function (err, db) {
@@ -33,5 +33,10 @@ module.exports = {
 
   getClientPromise: function() {
     return clientPromise;
+  },
+
+  usersCollection: async function() {
+    const client = await this.getClientPromise()
+    return client.db("birthdays").collection("users")
   }
 };

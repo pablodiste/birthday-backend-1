@@ -10,38 +10,50 @@ const dbo = require("../db/conn");
 
 // This section will help you get a list of all the records.
 recordRoutes.route("/users").get(async function (req, res) {
-
-  const client = await dbo.getClientPromise();
-  //const dbConnect = dbo.getDb();
-
-  //dbConnect
-  client.db("birthdays")
-    .collection("users")
-    .find({}).limit(50)
+  let users = await dbo.usersCollection()
+  users.find({}).limit(50)
     .toArray(function (err, result) {
       if (err) {
         res.status(400).send("Error fetching listings!");
-     } else {
+      } else {
         res.json(result);
       }
     });
-  });
+});
 
-/*
 // This section will help you create a new record.
-recordRoutes.route("/listings/recordSwipe").post(function (req, res) {
-  // Insert swipe informations
+recordRoutes.route("/users/:userId/").get(async function (req, res) {
+  let usersCollection = await dbo.usersCollection()
+  let user = await usersCollection.findOne({ userId: req.params.userId })
+  console.log(user)
+  res.json(user);
 });
 
-// This section will help you update a record by id.
-recordRoutes.route("/listings/updateLike").post(function (req, res) {
-  // Update likes
+// This section will help you create a new record.
+recordRoutes.route("/users/:userId/contacts/").get(async function (req, res) {
+  let usersCollection = await dbo.usersCollection()
+  let user = await usersCollection.findOne({ userId: req.params.userId })
+  res.json(user.contacts);
 });
 
-// This section will help you delete a record
-recordRoutes.route("/listings/delete").delete((req, res) => {
-  // Delete documents
+// This section will help you create a new record.
+recordRoutes.route("/users/:userId/contacts/").post(async function (req, res) {
+  let usersCollection = await dbo.usersCollection()
+
+  const input = req.body
+  const filter = { userId: req.params.userId };
+  //const options = { upsert: true };
+  const options = {}
+  const updateDoc = {
+    $push: { contacts: input },
+  };
+  const result = await usersCollection.updateOne(filter, updateDoc, options);
+  console.log(
+    `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
+  );
+
+  let user = await usersCollection.findOne({ userId: req.params.userId })
+  res.json(user.contacts.filter( (item) => item.id == input.id )[0]);
 });
-*/
 
 module.exports = recordRoutes;
