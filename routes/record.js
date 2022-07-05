@@ -1,4 +1,5 @@
 const express = require("express");
+const sha1 = require("sha1");
 
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
@@ -41,6 +42,7 @@ recordRoutes.route("/users/:userId/contacts/").post(async function (req, res) {
   let usersCollection = await dbo.usersCollection()
 
   const input = req.body
+  input.id = sha1(input.name)
   const filter = { userId: req.params.userId };
   //const options = { upsert: true };
   const options = {}
@@ -54,6 +56,25 @@ recordRoutes.route("/users/:userId/contacts/").post(async function (req, res) {
 
   let user = await usersCollection.findOne({ userId: req.params.userId })
   res.json(user.contacts.filter( (item) => item.id == input.id )[0]);
+});
+
+// This section will help you create a new record.
+recordRoutes.route("/users/:userId/contacts/:contactId").delete(async function (req, res) {
+  let contactId = req.params.contactId;
+  let userId = req.params.userId;
+  let usersCollection = await dbo.usersCollection();
+
+  const filter = { userId: userId };
+  //const options = { upsert: true };
+  const options = {}
+  const updateDoc = {
+    $pull: { contacts: { id: contactId } },
+  };
+  const result = await usersCollection.updateOne(filter, updateDoc, options);
+  console.log(
+    `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
+  );
+  res.json({ result: 'success' });
 });
 
 module.exports = recordRoutes;
